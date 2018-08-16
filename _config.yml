@@ -15,6 +15,7 @@
 # in the templates via {{ site.myvariable }}.
 title: Road To 50
 email: anonymous@example.com
+author: Shijie Wang
 description: >- # this means to ignore newlines until "baseurl:"
   Write an awesome description for your new site here. You can edit this
   line in _config.yml. It will appear in your document head meta (for
@@ -27,10 +28,9 @@ github_username:  Jim0115
 # Build settings
 markdown: kramdown
 theme: minima
-source: ./_posts
 plugins:
   - jekyll-feed
-
+rss: rss
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
