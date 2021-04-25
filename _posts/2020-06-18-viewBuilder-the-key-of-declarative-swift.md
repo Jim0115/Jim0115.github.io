@@ -1,3 +1,7 @@
+---
+title: ViewBuilder，声明式 Swift 的关键
+layout: post
+---
 # @ViewBuilder，声明式 Swift 的关键
 
 Swift 的目标为一门实用的工业语言，从其诞生之日起，便在对各种编程范式的支持上越走越远。面向对象编程（Object Oriented Programming）、函数式编程（Functional Programming）、泛型编程（Generic Programming）等思想都在 Swift 中得到了体现与运用。但同时作为 iOS 开发的官方语言， Swift 基于自身命令式编程的本质，并非编写 UI 的最佳方式。虽然苹果在 Xcode 中集成了 Interface Builder，并希望以此解决界面开发的问题，但由于 IB 在多人协作等方面的问题，始终未能在大规模项目中得到应用。因此在 WWDC 2019 中，苹果推出了 [SwiftUI](https://developer.apple.com/xcode/swiftui/) 作为一种新的用户界面实现方式，同时也向 Swift 中引入了新的编程范式 —— 声明式编程（Declarative Programming）。
