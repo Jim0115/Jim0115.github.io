@@ -199,6 +199,108 @@ extension CustomTransitioning {
 
 <video autoplay=true src="/asserts/PopGesture/Demo.mp4" controls loop=true width="50%"></video>
 
+
+
+### 7.24 Update
+
+之前的代码实现过于繁琐，同样的动画逻辑分散在不同方法内。使用 iOS 10 引入的新 API  `UIViewPropertyAnimator` 和 `UIViewControllerAnimatedTransitioning` 下的`optional func interruptibleAnimator(using transitionContext: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating`方法重新实现了 `CustomTransitioning`，其他逻辑不变。
+
+```swift
+class CustomTransitioning: UIPercentDrivenInteractiveTransition, UIViewControllerAnimatedTransitioning {
+
+    private var context: UIViewControllerContextTransitioning!
+    private var animator: UIViewPropertyAnimator?
+    var operation = UINavigationController.Operation.none {
+        didSet {
+            animator = nil
+        }
+    }
+
+
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        0.25
+    }
+
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        interruptibleAnimator(using: transitionContext).startAnimation()
+    }
+
+    func interruptibleAnimator(using transitionContext: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
+        if let animator = animator {
+            return animator
+        } else {
+            let animator = UIViewPropertyAnimator(duration: transitionDuration(using: transitionContext),
+                                                  curve: .easeInOut)
+
+            let fromVC = transitionContext.viewController(forKey: .from)!
+            let fromView = transitionContext.view(forKey: .from)!
+            let toView = transitionContext.view(forKey: .to)!
+
+            let containerView = transitionContext.containerView
+            containerView.addSubview(toView)
+
+            let fromViewInitialFrame = transitionContext.initialFrame(for: fromVC)
+
+            if operation == .pop {
+                toView.frame = fromViewInitialFrame.offsetBy(dx: -fromViewInitialFrame.width, dy: 0)
+
+                animator.addAnimations {
+                    fromView.frame.origin.x = fromView.frame.width
+                    toView.frame.origin = .zero
+                }
+            } else if operation == .push {
+                toView.frame = fromViewInitialFrame.offsetBy(dx: fromViewInitialFrame.width, dy: 0)
+
+                animator.addAnimations {
+                    fromView.frame.origin.x = -fromView.frame.width
+                    toView.frame.origin = .zero
+                }
+            }
+
+            animator.addCompletion { position in
+                if position == .end {
+                    transitionContext.completeTransition(true)
+                } else {
+                    transitionContext.completeTransition(false)
+                }
+            }
+
+            self.animator = animator
+
+            return animator
+        }
+    }
+}
+
+extension CustomTransitioning {
+    override func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
+        context = transitionContext
+        interruptibleAnimator(using: context).startAnimation()
+    }
+
+    override func update(_ percentComplete: CGFloat) {
+        interruptibleAnimator(using: context).pauseAnimation()
+        interruptibleAnimator(using: context).fractionComplete = percentComplete
+        context.updateInteractiveTransition(percentComplete)
+    }
+
+    override func finish() {
+        context.finishInteractiveTransition()
+        interruptibleAnimator(using: context).continueAnimation?(withTimingParameters: UICubicTimingParameters(animationCurve: .linear), durationFactor: 1 - percentComplete)
+    }
+
+    override func cancel() {
+        context.cancelInteractiveTransition()
+        interruptibleAnimator(using: context).isReversed = true
+        interruptibleAnimator(using: context).continueAnimation?(withTimingParameters: UICubicTimingParameters(animationCurve: .linear), durationFactor: percentComplete)
+    }
+}
+```
+
+
+
+
+
 ### 思路二最需要注意的地方：判断条件
 
 对于动画的审美可能因人而异，有人觉得最简单的横向滑动就足够，有人追求绚丽的转场效果。然而个人认为在这种实现方式中最重要的点在于返回成功与否的判断条件。
