@@ -19,7 +19,7 @@ author: Shijie Wang
 description: >- # this means to ignore newlines until "baseurl:"
  积跬步，至千里。
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://jim0115.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: Jim_0115
 github_username:  Jim0115
 
